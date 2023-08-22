@@ -1,0 +1,10 @@
+syntax = "proto3";    // proto-lang's version
+
+option go_package = "/user";   // address of the go file which be generated
+
+package tiktok.simple.http.idl;   // address of this proto file
+
+message
+
+
+
