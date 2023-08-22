@@ -9,10 +9,10 @@
 package dao
 
 import (
-	"adousheng/repository/db"
-	"adousheng/repository/db/model"
 	"context"
 	"gorm.io/gorm"
+	"tiktok-simple/repository/db"
+	"tiktok-simple/repository/db/model"
 )
 
 type videoDao struct {
