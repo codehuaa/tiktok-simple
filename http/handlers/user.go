@@ -10,7 +10,10 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
+	"tiktok-simple/http/rpc"
+	kitex "tiktok-simple/kitex/kitex_gen/user"
 )
 
 /**
@@ -19,7 +22,15 @@ import (
  * @Author:
  */
 func Register(ctx context.Context, req *app.RequestContext) {
-
+	fmt.Println("call sucessfully!")
+	username := req.Query("username")
+	password := req.Query("password")
+	userReq := &kitex.UserRegisterRequest{
+		Username: username,
+		Password: password,
+	}
+	res, _ := rpc.Register(ctx, userReq)
+	fmt.Println(res)
 }
 
 /**
