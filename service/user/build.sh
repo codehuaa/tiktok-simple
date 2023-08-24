@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 RUN_NAME="userService"
-
+cd user
 mkdir -p output/bin
 cp script/* output/
 chmod +x output/bootstrap.sh

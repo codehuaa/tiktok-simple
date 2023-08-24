@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	user "tiktok-simple/kitex/kitex_gen/user"
 )
 
@@ -12,8 +11,13 @@ type UserServiceImpl struct{}
 // Register implements the UserServiceImpl interface.
 func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRequest) (resp *user.UserRegisterResponse, err error) {
 	// TODO: Your code here...
-	fmt.Println("test sucessfully!")
-	return
+	resp = &user.UserRegisterResponse{
+		StatusCode: 0,
+		StatusMsg:  "success",
+		UserId:     123,
+		Token:      "asdf",
+	}
+	return resp, nil
 }
 
 // Login implements the UserServiceImpl interface.
