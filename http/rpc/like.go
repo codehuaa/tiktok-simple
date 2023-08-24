@@ -12,8 +12,6 @@ import (
 	"context"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/retry"
-	etcd "github.com/kitex-contrib/registry-etcd"
-	trace "github.com/kitex-contrib/tracer-opentracing"
 	"tiktok-simple/kitex/kitex_gen/favorite"
 	"tiktok-simple/kitex/kitex_gen/favorite/favoriteservice"
 	"tiktok-simple/pkg/constants"
@@ -23,10 +21,6 @@ import (
 var likeClient favoriteservice.Client
 
 func initLikeRpc() {
-	r, err := etcd.NewEtcdResolver([]string{constants.EtcdAddress})
-	if err != nil {
-		panic(err)
-	}
 
 	c, err := favoriteservice.NewClient(
 		constants.LikeServiceName,
@@ -34,8 +28,6 @@ func initLikeRpc() {
 		client.WithRPCTimeout(3*time.Second),              // rpc timeout
 		client.WithConnectTimeout(50*time.Millisecond),    // conn timeout
 		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
-		client.WithSuite(trace.NewDefaultClientSuite()),   // tracer
-		client.WithResolver(r),                            // resolver
 	)
 	if err != nil {
 		panic(err)
