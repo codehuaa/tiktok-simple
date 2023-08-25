@@ -10,10 +10,11 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"tiktok-simple/http/rpc"
 	kitex "tiktok-simple/kitex/kitex_gen/user"
+	"tiktok-simple/pkg/response"
 )
 
 /**
@@ -22,15 +23,29 @@ import (
  * @Author:
  */
 func Register(ctx context.Context, req *app.RequestContext) {
-	fmt.Println("call sucessfully!")
-	username := req.Query("username")
-	password := req.Query("password")
+	username := req.PostForm("username")
+	password := req.PostForm("password")
+	if username == "" || password == "" {
+		req.JSON(consts.StatusOK, "")
+	}
 	userReq := &kitex.UserRegisterRequest{
 		Username: username,
 		Password: password,
 	}
-	resp, _ := rpc.Register(ctx, userReq)
-	fmt.Println(resp)
+	data, err := rpc.Register(ctx, userReq)
+	if err != nil {
+		req.JSON(consts.StatusOK, response.Register{
+			Base:   response.ERR.WithMsg(err.Error()),
+			UserId: 0,
+			Token:  "",
+		})
+		return
+	}
+	req.JSON(consts.StatusOK, response.Register{
+		Base:   response.OK,
+		UserId: data.UserId,
+		Token:  data.Token,
+	})
 }
 
 /**
@@ -39,7 +54,26 @@ func Register(ctx context.Context, req *app.RequestContext) {
  * @Author:
  */
 func Login(ctx context.Context, req *app.RequestContext) {
-
+	username := req.PostForm("username")
+	password := req.PostForm("password")
+	if username == "" || password == "" {
+		req.JSON(consts.StatusOK, "")
+	}
+	data, err := rpc.Login(ctx, &kitex.UserLoginRequest{
+		Username: username,
+		Password: password,
+	})
+	if err != nil {
+		req.JSON(consts.StatusOK, response.Register{
+			Base:   response.ERR.WithMsg(err.Error()),
+			UserId: 0,
+			Token:  "",
+		})
+	}
+	req.JSON(consts.StatusOK, response.Login{
+		UserId: data.UserId,
+		Token:  data.Token,
+	})
 }
 
 /**
