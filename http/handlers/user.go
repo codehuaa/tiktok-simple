@@ -29,8 +29,8 @@ func Register(ctx context.Context, req *app.RequestContext) {
 		Username: username,
 		Password: password,
 	}
-	res, _ := rpc.Register(ctx, userReq)
-	fmt.Println(res)
+	resp, _ := rpc.Register(ctx, userReq)
+	fmt.Println(resp)
 }
 
 /**

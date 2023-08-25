@@ -11,11 +11,9 @@ package rpc
 import (
 	"context"
 	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/retry"
 	"tiktok-simple/kitex/kitex_gen/comment"
 	"tiktok-simple/kitex/kitex_gen/comment/commentservice"
 	"tiktok-simple/pkg/constants"
-	"time"
 )
 
 var commentClient commentservice.Client
@@ -24,10 +22,10 @@ func initCommentRpc() {
 
 	c, err := commentservice.NewClient(
 		constants.CommentServiceName,
-		client.WithMuxConnection(1),                       // mux
-		client.WithRPCTimeout(3*time.Second),              // rpc timeout
-		client.WithConnectTimeout(50*time.Millisecond),    // conn timeout
-		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
+		client.WithHostPorts("0.0.0.0:8084"),
+		// client.WithMuxConnection(1),                    // mux
+		// client.WithRPCTimeout(3*time.Second),           // rpc timeout
+		// client.WithConnectTimeout(50*time.Millisecond), // conn timeout
 	)
 	if err != nil {
 		panic(err)

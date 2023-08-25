@@ -14,7 +14,6 @@ import (
 	"tiktok-simple/kitex/kitex_gen/user"
 	"tiktok-simple/kitex/kitex_gen/user/userservice"
 	"tiktok-simple/pkg/constants"
-	"time"
 )
 
 var userClient userservice.Client
@@ -22,9 +21,10 @@ var userClient userservice.Client
 func initUserRpc() {
 	c, err := userservice.NewClient(
 		constants.UserServiceName,
-		client.WithMuxConnection(1),                    // mux
-		client.WithRPCTimeout(3*time.Second),           // rpc timeout
-		client.WithConnectTimeout(50*time.Millisecond), // conn timeout
+		client.WithHostPorts("0.0.0.0:8081"),
+		// client.WithMuxConnection(1),                    // mux
+		// client.WithRPCTimeout(3*time.Second),           // rpc timeout
+		// client.WithConnectTimeout(50*time.Millisecond), // conn timeout
 	)
 	if err != nil {
 		panic(err)

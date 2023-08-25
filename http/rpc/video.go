@@ -11,11 +11,9 @@ package rpc
 import (
 	"context"
 	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/retry"
 	"tiktok-simple/kitex/kitex_gen/video"
 	"tiktok-simple/kitex/kitex_gen/video/videoservice"
 	"tiktok-simple/pkg/constants"
-	"time"
 )
 
 var videoCLient videoservice.Client
@@ -24,10 +22,11 @@ func initVideoRpc() {
 
 	c, err := videoservice.NewClient(
 		constants.VideoServiceName,
-		client.WithMuxConnection(1),                       // mux
-		client.WithRPCTimeout(3*time.Second),              // rpc timeout
-		client.WithConnectTimeout(50*time.Millisecond),    // conn timeout
-		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
+		client.WithHostPorts("0.0.0.0:8082"),
+		// client.WithMuxConnection(1),                       // mux
+		// client.WithRPCTimeout(3*time.Second),              // rpc timeout
+		// client.WithConnectTimeout(50*time.Millisecond),    // conn timeout
+		// client.WithFailureRetry(retry.NewFailurePolicy()), // retry
 	)
 	if err != nil {
 		panic(err)

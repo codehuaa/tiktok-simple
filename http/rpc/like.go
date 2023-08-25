@@ -11,11 +11,9 @@ package rpc
 import (
 	"context"
 	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/retry"
 	"tiktok-simple/kitex/kitex_gen/favorite"
 	"tiktok-simple/kitex/kitex_gen/favorite/favoriteservice"
 	"tiktok-simple/pkg/constants"
-	"time"
 )
 
 var likeClient favoriteservice.Client
@@ -24,10 +22,10 @@ func initLikeRpc() {
 
 	c, err := favoriteservice.NewClient(
 		constants.LikeServiceName,
-		client.WithMuxConnection(1),                       // mux
-		client.WithRPCTimeout(3*time.Second),              // rpc timeout
-		client.WithConnectTimeout(50*time.Millisecond),    // conn timeout
-		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
+		client.WithHostPorts("0.0.0.0:8083"),
+		// client.WithMuxConnection(1),                    // mux
+		// client.WithRPCTimeout(3*time.Second),           // rpc timeout
+		// client.WithConnectTimeout(50*time.Millisecond), // conn timeout
 	)
 	if err != nil {
 		panic(err)
