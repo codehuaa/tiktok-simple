@@ -10,8 +10,8 @@ package response
 
 var (
 	// =============请求通用结构=============
-	OK  = response(200, "ok")
-	ERR = response(500, "")
+	OK  = response(0, "ok")
+	ERR = response(-1, "")
 
 	// =============自定义的错误信息=============
 

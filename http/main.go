@@ -16,6 +16,7 @@ import (
 
 func Init() {
 	rpc.InitRPC()
+	// db.MySQLInit()
 }
 
 func main() {

@@ -8,35 +8,24 @@
 
 package response
 
-type Response struct {
-	Code int         `json:"code"`
-	Msg  string      `json:"msg"`
-	Data interface{} `json:"data"`
+// Status_Code 为0表示成功，其他值表示失败
+type Base struct {
+	StatusCode int    `json:"status_code"`
+	StatusMsg  string `json:"status_msg"`
 }
 
 // WithMsg 快速创建一个只更改 Msg 的Response
-func (resp *Response) WithMsg(message string) Response {
-	return Response{
-		Code: resp.Code,
-		Msg:  message,
-		Data: resp.Data,
-	}
-}
-
-// WithData 快速创建一个只更改 Data 的Response
-func (resp *Response) WithData(data interface{}) Response {
-	return Response{
-		Code: resp.Code,
-		Msg:  resp.Msg,
-		Data: data,
+func (resp *Base) WithMsg(message string) Base {
+	return Base{
+		StatusCode: resp.StatusCode,
+		StatusMsg:  message,
 	}
 }
 
 // response 构造一个 Response 框架，不携带 Data
-func response(code int, msg string) *Response {
-	return &Response{
-		Code: code,
-		Msg:  msg,
-		Data: nil,
+func response(code int, msg string) Base {
+	return Base{
+		StatusCode: code,
+		StatusMsg:  msg,
 	}
 }

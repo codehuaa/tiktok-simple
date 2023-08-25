@@ -14,7 +14,7 @@ import (
 
 var _db *gorm.DB
 
-func MySQLInit() {
+func init() {
 	conn := "root:root@tcp(127.0.0.1:3306)/tiktok-simple?charset=utf8&parseTime=true"
 	var ormLogger logger.Interface
 	if gin.Mode() == "debug" {
