@@ -8,6 +8,11 @@
 
 package response
 
+import (
+	"tiktok-simple/kitex/kitex_gen/comment"
+	"tiktok-simple/kitex/kitex_gen/video"
+)
+
 // 用户相关
 type Register struct {
 	Base
@@ -26,7 +31,38 @@ type UserInfo struct {
 }
 
 // 视频相关
+type PublishAction struct {
+	Base
+}
+
+type PublishList struct {
+	Base
+	VideoList []*video.Video `json:"video_list"`
+}
+
+type Feed struct {
+	Base
+	NextTime  int64          `json:"next_time"`
+	VideoList []*video.Video `json:"video_list"`
+}
 
 // 喜欢相关
+type FavoriteAction struct {
+	Base
+}
+
+type FavoriteList struct {
+	Base
+	VideoList []*video.Video `json:"video_list"`
+}
 
 // 评论相关
+type CommentAction struct {
+	Base
+	Comment *comment.Comment `json:"comment"`
+}
+
+type CommentList struct {
+	Base
+	CommentList []*comment.Comment `json:"comment_list"`
+}
