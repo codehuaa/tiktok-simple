@@ -2,6 +2,8 @@ package db
 
 import (
 	"context"
+	"strings"
+	conf "tiktok-simple/config"
 	"tiktok-simple/repository/db/model"
 	"time"
 
@@ -15,7 +17,7 @@ import (
 var _db *gorm.DB
 
 func init() {
-	conn := "root:root@tcp(127.0.0.1:3306)/tiktok-simple?charset=utf8&parseTime=true"
+	conn := strings.Join([]string{conf.DbUser, ":", conf.DbPassWord, "@tcp(", conf.DbHost, ":", conf.DbPort, ")/", conf.DbName, "?charset=utf8&parseTime=true"}, "")
 	var ormLogger logger.Interface
 	if gin.Mode() == "debug" {
 		ormLogger = logger.Default.LogMode(logger.Info)
