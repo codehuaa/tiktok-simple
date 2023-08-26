@@ -16,3 +16,7 @@ var (
 	// =============自定义的错误信息=============
 
 )
+
+func Err(msg string) Base {
+	return response(-1, msg)
+}

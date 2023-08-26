@@ -28,10 +28,7 @@ func CommentAction(ctx context.Context, req *app.RequestContext) {
 	vid, err := strconv.ParseInt(req.PostForm("video_id"), 10, 64)
 	if err != nil {
 		req.JSON(http.StatusOK, response.CommentAction{
-			Base: response.Base{
-				StatusCode: -1,
-				StatusMsg:  "video_id 不合法",
-			},
+			Base:    response.Err("video_id不合法"),
 			Comment: nil,
 		})
 		return
@@ -39,10 +36,7 @@ func CommentAction(ctx context.Context, req *app.RequestContext) {
 	actionType, err := strconv.ParseInt(req.PostForm("action_type"), 10, 64)
 	if err != nil || (actionType != 1 && actionType != 2) {
 		req.JSON(http.StatusOK, response.CommentAction{
-			Base: response.Base{
-				StatusCode: -1,
-				StatusMsg:  "action_type 不合法",
-			},
+			Base:    response.Err("action_type不合法"),
 			Comment: nil,
 		})
 		return
@@ -56,10 +50,7 @@ func CommentAction(ctx context.Context, req *app.RequestContext) {
 		commentText := req.PostForm("comment_text")
 		if commentText == "" {
 			req.JSON(http.StatusOK, response.CommentAction{
-				Base: response.Base{
-					StatusCode: -1,
-					StatusMsg:  "comment_text 不能为空",
-				},
+				Base:    response.Err("评论不能为空"),
 				Comment: nil,
 			})
 			return
@@ -69,10 +60,7 @@ func CommentAction(ctx context.Context, req *app.RequestContext) {
 		commentID, err := strconv.ParseInt(req.Query("comment_id"), 10, 64)
 		if err != nil {
 			req.JSON(http.StatusOK, response.CommentAction{
-				Base: response.Base{
-					StatusCode: -1,
-					StatusMsg:  "comment_id 不合法",
-				},
+				Base:    response.Err("comment_id不合法"),
 				Comment: nil,
 			})
 			return
@@ -82,19 +70,13 @@ func CommentAction(ctx context.Context, req *app.RequestContext) {
 	res, _ := rpc.CommentAction(ctx, requ)
 	if res.StatusCode == -1 {
 		req.JSON(http.StatusOK, response.CommentAction{
-			Base: response.Base{
-				StatusCode: -1,
-				StatusMsg:  res.StatusMsg,
-			},
+			Base:    response.Err(res.StatusMsg),
 			Comment: nil,
 		})
 		return
 	}
 	req.JSON(http.StatusOK, response.CommentAction{
-		Base: response.Base{
-			StatusCode: 0,
-			StatusMsg:  res.StatusMsg,
-		},
+		Base:    response.OK,
 		Comment: res.Comment,
 	})
 }
@@ -109,10 +91,7 @@ func CommentList(ctx context.Context, req *app.RequestContext) {
 	vid, err := strconv.ParseInt(req.PostForm("video_id"), 10, 64)
 	if err != nil {
 		req.JSON(http.StatusOK, response.CommentList{
-			Base: response.Base{
-				StatusCode: -1,
-				StatusMsg:  "video_id 不合法",
-			},
+			Base:        response.Err("video_id不合法"),
 			CommentList: nil,
 		})
 		return
@@ -124,19 +103,13 @@ func CommentList(ctx context.Context, req *app.RequestContext) {
 	res, _ := rpc.CommentList(ctx, r)
 	if res.StatusCode == -1 {
 		req.JSON(http.StatusOK, response.CommentList{
-			Base: response.Base{
-				StatusCode: -1,
-				StatusMsg:  res.StatusMsg,
-			},
+			Base:        response.Err(res.StatusMsg),
 			CommentList: nil,
 		})
 		return
 	}
 	req.JSON(http.StatusOK, response.CommentList{
-		Base: response.Base{
-			StatusCode: 0,
-			StatusMsg:  res.StatusMsg,
-		},
+		Base:        response.OK,
 		CommentList: res.CommentList,
 	})
 }
