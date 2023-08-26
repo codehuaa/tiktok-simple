@@ -26,7 +26,10 @@ func Register(ctx context.Context, req *app.RequestContext) {
 	username := req.PostForm("username")
 	password := req.PostForm("password")
 	if username == "" || password == "" {
-		req.JSON(consts.StatusOK, "")
+		req.JSON(consts.StatusOK, response.Register{
+			Base: response.ERR.WithMsg("请输入账号密码"),
+		})
+		return
 	}
 	userReq := &kitex.UserRegisterRequest{
 		Username: username,
