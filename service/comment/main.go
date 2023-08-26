@@ -8,7 +8,12 @@ import (
 	comment2 "tiktok-simple/service/comment/service"
 )
 
+func Init() {
+	comment2.Init("signingKey")
+}
+
 func main() {
+	Init()
 	// 处理多个微服务时端口冲突的问题
 	addr, _ := net.ResolveTCPAddr("tcp", ":8084")
 	var opts []server.Option

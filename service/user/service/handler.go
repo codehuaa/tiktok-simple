@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
 	user "tiktok-simple/kitex/kitex_gen/user"
+	"tiktok-simple/pkg/jwt"
 	"tiktok-simple/repository/db/dao"
 	"tiktok-simple/repository/db/model"
+	"time"
 )
 
 // UserServiceImpl implements the last service interface defined in the IDL.
@@ -15,22 +18,28 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 	// return &user.UserRegisterResponse{StatusCode: 0}, err
 	// 注册
 	userDao := dao.NewUserDao(ctx)
-	err = userDao.CreateUser(&model.User{
+	if err = userDao.CreateUser(&model.User{
 		UserName: req.Username,
 		Password: req.Password,
-	})
-	if err != nil {
+	}); err != nil {
 		// 状态码非0，表示失败
 		return nil, err
 	}
-
-	// TODO 如果成功，生成token，并返回给用户
-	token := "this is tmp token"
 
 	// 查询 userId
 	User, err := userDao.FindUserByUserName(req.Username)
 	if err != nil {
 		return &user.UserRegisterResponse{StatusCode: 1}, err
+	}
+
+	// TODO 如果成功，生成token，并返回给用户
+	claims := jwt.CustomClaims{
+		Id: int64(User.ID),
+	}
+	claims.ExpiresAt = time.Now().Add(time.Minute * 5).Unix()
+	token, err := Jwt.CreateToken(claims)
+	if err != nil {
+		return nil, err
 	}
 
 	resp = &user.UserRegisterResponse{
@@ -59,7 +68,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 			Token:      token,
 		}, nil
 	}
-	return
+	return nil, errors.New("用户名密码不正确")
 }
 
 // UserInfo implements the UserServiceImpl interface.

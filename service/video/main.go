@@ -8,7 +8,12 @@ import (
 	"tiktok-simple/service/video/service"
 )
 
+func Init() {
+	service.Init("signingKey")
+}
+
 func main() {
+	Init()
 	// 处理多个微服务时端口冲突的问题
 	addr, _ := net.ResolveTCPAddr("tcp", ":8082")
 	var opts []server.Option
