@@ -69,8 +69,10 @@ func Login(ctx context.Context, req *app.RequestContext) {
 			UserId: 0,
 			Token:  "",
 		})
+		return
 	}
 	req.JSON(consts.StatusOK, response.Login{
+		Base:   response.OK,
 		UserId: data.UserId,
 		Token:  data.Token,
 	})
