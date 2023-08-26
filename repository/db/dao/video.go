@@ -51,7 +51,7 @@ func (dao *videoDao) FindVideoListByVideoName(title string) (video []*model.Vide
 // @param id 视频id
 // @return *video 视频数据
 // @return error
-func (dao *videoDao) FindVideoByVideoId(id int64) (video []*model.Video, err error) {
+func (dao *videoDao) FindVideoByVideoId(id int64) (video *model.Video, err error) {
 	err = dao.DB.Model(&model.Video{}).Where("id=?", uint(id)).
 		Find(&video).Error
 
