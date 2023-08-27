@@ -10,8 +10,10 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"strconv"
 	"tiktok-simple/http/rpc"
 	kitex "tiktok-simple/kitex/kitex_gen/user"
 	"tiktok-simple/pkg/response"
@@ -74,6 +76,7 @@ func Login(ctx context.Context, req *app.RequestContext) {
 		})
 		return
 	}
+	// todo 使用redis记录登录状态
 	req.JSON(consts.StatusOK, response.Login{
 		Base:   response.OK,
 		UserId: data.UserId,
@@ -87,5 +90,31 @@ func Login(ctx context.Context, req *app.RequestContext) {
  * @Author:
  */
 func UserInfo(ctx context.Context, req *app.RequestContext) {
+	userId := req.Query("user_id")
+	token := req.Query("token")
 
+	id, err := strconv.ParseInt(userId, 10, 64)
+	if err != nil {
+		req.JSON(consts.StatusOK, response.UserInfo{
+			Base: response.ERR.WithMsg("用户id不合法"),
+		})
+		return
+	}
+
+	// 调用rpc
+	data, err := rpc.UserInfo(ctx, &kitex.UserInfoRequest{
+		UserId: id,
+		Token:  token,
+	})
+	if err != nil {
+		req.JSON(consts.StatusOK, response.UserInfo{
+			Base: response.ERR.WithMsg(err.Error()),
+		})
+		return
+	}
+	fmt.Println(data)
+	req.JSON(consts.StatusOK, response.UserInfo{
+		Base: response.OK,
+		User: *data.User,
+	})
 }

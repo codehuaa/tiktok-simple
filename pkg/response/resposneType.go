@@ -10,6 +10,7 @@ package response
 
 import (
 	"tiktok-simple/kitex/kitex_gen/comment"
+	"tiktok-simple/kitex/kitex_gen/user"
 	"tiktok-simple/kitex/kitex_gen/video"
 )
 
@@ -28,6 +29,7 @@ type Login struct {
 
 type UserInfo struct {
 	Base
+	user.User
 }
 
 // 视频相关
