@@ -73,6 +73,29 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 
 // UserInfo implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserInfo(ctx context.Context, req *user.UserInfoRequest) (resp *user.UserInfoResponse, err error) {
-	// TODO: Your code here...
-	return
+	userId := req.UserId
+	// token := req.Token
+	userDao := dao.NewUserDao(ctx)
+	// TODO: 调用redis确认用户登陆状态
+
+	// 获取用户信息
+	userInfo, err := userDao.FindUserByUserId(uint(userId))
+	if err != nil {
+		return nil, err
+	}
+	return &user.UserInfoResponse{
+		StatusCode: 0,
+		StatusMsg:  "success",
+		User: &user.User{
+			Id:              int64(userInfo.ID),
+			Name:            userInfo.UserName,
+			FollowCount:     int64(userInfo.FollowerCount),
+			FollowerCount:   int64(userInfo.FollowerCount),
+			Avatar:          userInfo.Avatar,
+			BackgroundImage: userInfo.BackgroundImage,
+			Signature:       userInfo.Signature,
+			WorkCount:       int64(userInfo.WorkCount),
+			FavoriteCount:   int64(userInfo.FavoritedCount),
+		},
+	}, nil
 }
