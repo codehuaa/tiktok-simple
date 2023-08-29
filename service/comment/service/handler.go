@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	"github.com/bytedance/gopkg/util/logger"
+	"gorm.io/gorm"
 	comment "tiktok-simple/kitex/kitex_gen/comment"
+	kitex "tiktok-simple/kitex/kitex_gen/user"
 	"tiktok-simple/repository/db/dao"
 	"tiktok-simple/repository/db/model"
 )
@@ -116,6 +118,63 @@ func (s *CommentServiceImpl) CommentAction(ctx context.Context, req *comment.Com
 
 // CommentList implements the CommentServiceImpl interface.
 func (s *CommentServiceImpl) CommentList(ctx context.Context, req *comment.CommentListRequest) (resp *comment.CommentListResponse, err error) {
-	// TODO: Your code here...
+	var userID int64 = -1
+	// 验证token有效性
+	if req.Token != "" {
+		claims, err := Jwt.ParseToken(req.Token)
+		if err != nil {
+			logger.Errorf("token解析错误:%v", err)
+			res := &comment.CommentListResponse{
+				StatusCode: -1,
+				StatusMsg:  "token 解析错误",
+			}
+			return res, nil
+		}
+		userID = claims.Id
+	}
+
+	// 从数据库获取评论列表
+	commentDao := dao.NewCommentDao(ctx)
+	results, err := commentDao.FindCommentListByVideoID(req.VideoId)
+	if err != nil {
+		res := &comment.CommentListResponse{
+			StatusCode: -1,
+			StatusMsg:  "评论列表获取失败：服务器内部错误",
+		}
+		return res, nil
+	}
+	comments := make([]*comment.Comment, 0)
+	for _, r := range results {
+		userDao := dao.NewUserDao(ctx)
+		u, err := userDao.FindUserByUserId(uint(userID))
+		if err != nil && err != gorm.ErrRecordNotFound {
+			res := &comment.CommentListResponse{
+				StatusCode: -1,
+				StatusMsg:  "评论列表获取失败：服务器内部错误",
+			}
+			return res, nil
+		}
+		usr := &kitex.User{
+			Id:              userID,
+			Name:            u.UserName,
+			FollowCount:     int64(u.FollowingCount),
+			FollowerCount:   int64(u.FollowerCount),
+			IsFollow:        err != gorm.ErrRecordNotFound,
+			Signature:       u.Signature,
+			Avatar:          u.Avatar,
+			BackgroundImage: u.BackgroundImage,
+			TotalFavorited:  int64(u.FavoritedCount),
+			WorkCount:       int64(u.WorkCount),
+			FavoriteCount:   int64(u.FavoritingCount),
+		}
+		comments = append(comments, &comment.Comment{
+			Id:         int64(r.ID),
+			User:       usr,
+			Content:    r.Content,
+			CreateDate: r.CreatedAt.Format("2006-01-02"),
+			LikeCount:  int64(r.LikeCount),
+			TeaseCount: int64(r.TeaseCount),
+		})
+	}
 	return
 }

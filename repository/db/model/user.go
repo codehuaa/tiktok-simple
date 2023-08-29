@@ -11,7 +11,7 @@ type User struct {
 	gorm.Model
 	UserName        string  `gorm:"index:idx_username,unique;type:varchar(40);not null" json:"name,omitempty"`
 	Password        string  `gorm:"type:varchar(256);not null" json:"password,omitempty"`
-	FavoriteVideos  []Video `gorm:"many2many:user_favorite_videos" json:"favorite_videos,omitempty"`
+	FavoriteVideos  []Video `gorm:"many2many:like_video" json:"favorite_videos,omitempty"`
 	FollowingCount  uint    `gorm:"default:0;not null" json:"follow_count,omitempty"`                                                           // 关注总数
 	FollowerCount   uint    `gorm:"default:0;not null" json:"follower_count,omitempty"`                                                         // 粉丝总数
 	Avatar          string  `gorm:"type:varchar(256)" json:"avatar,omitempty"`                                                                  // 用户头像
