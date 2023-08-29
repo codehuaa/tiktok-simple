@@ -46,8 +46,8 @@ func (dao *LikeDao) CreateVideoLike(likeVideo *model.LikeVideo) error {
 	}
 
 	// 更新视频的FavoriteCount
-	err = dao.DB.Model(&model.Video{}).Where("id=?", uint(videoId)).Update("favorite_count",
-		gorm.Expr("favorite_count + ?", 1)).Error
+	err = dao.DB.Model(&model.Video{}).Where("id=?", uint(videoId)).Update("like_count",
+		gorm.Expr("like_count + ?", 1)).Error
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (dao *LikeDao) CreateCommentLike(likeComment *model.LikeComment) error {
 	return err
 }
 
-// DeleteVideoLikeById
+// DeleteVideoLikeByIds
 //
 //	@Description: 根据Id撤销视频喜欢
 //	@Date 2023-08-20 16:25:54
@@ -127,8 +127,8 @@ func (dao *LikeDao) DeleteVideoLikeByIds(videoId int64, userId int64) error {
 	if err != nil {
 		return err
 	}
-	err = dao.DB.Model(&model.User{}).Where("id=?", updater_id).Update("favoriting_count",
-		gorm.Expr("favoriting_count - ?", 1)).Error
+	err = dao.DB.Model(&model.User{}).Where("id=?", updater_id).Update("favorited_count",
+		gorm.Expr("favorited_count - ?", 1)).Error
 	return err
 
 }
