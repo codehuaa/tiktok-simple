@@ -11,6 +11,12 @@ package handlers
 import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"net/http"
+	"strconv"
+	"tiktok-simple/http/rpc"
+	"tiktok-simple/kitex/kitex_gen/video"
+	"tiktok-simple/pkg/response"
+	"time"
 )
 
 /**
@@ -19,7 +25,30 @@ import (
  * @Author:
  */
 func Feed(ctx context.Context, req *app.RequestContext) {
+	token := req.PostForm("token")
+	latestTime := req.PostForm("latest_time")
+	var timestamp int64 = 0
+	if latestTime != "" {
+		timestamp, _ = strconv.ParseInt(latestTime, 10, 64)
+	} else {
+		timestamp = time.Now().UnixMilli()
+	}
 
+	r := &video.FeedRequest{
+		LatestTime: timestamp,
+		Token:      token,
+	}
+	res, _ := rpc.Feed(ctx, r)
+	if res.StatusCode == -1 {
+		req.JSON(http.StatusOK, response.Feed{
+			Base: response.Err(res.StatusMsg),
+		})
+		return
+	}
+	req.JSON(http.StatusOK, response.Feed{
+		Base:      response.OK,
+		VideoList: res.VideoList,
+	})
 }
 
 /**
