@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	favorite "tiktok-simple/kitex/kitex_gen/favorite"
+	"tiktok-simple/kitex/kitex_gen/user"
+	"tiktok-simple/kitex/kitex_gen/video"
 	"tiktok-simple/repository/db/dao"
 	"tiktok-simple/repository/db/model"
 )
@@ -50,15 +52,47 @@ func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.Fa
 	// token := req.Token
 	user_id := req.UserId
 	like_dao := dao.NewLikeDao(ctx)
+	user_dao := dao.NewUserDao(ctx)
 
 	data, err := like_dao.GetVideoLikeList(user_id)
 	if err != nil {
 		return
 	}
 
+	var videos_resp []*video.Video
+
+	for _, temp_video := range data {
+		// 查找user
+		author, err := user_dao.FindUserByUserId(temp_video.AuthorID)
+		if err != nil {
+			return
+		}
+		videos_resp = append(videos_resp, &video.Video{
+			Id: int64(temp_video.ID),
+			Author: &user.User{
+				Id:              int64(author.ID),
+				Name:            author.UserName,
+				FollowCount:     int64(author.FollowingCount),
+				FollowerCount:   int64(author.FollowerCount),
+				Avatar:          author.Avatar,
+				BackgroundImage: author.BackgroundImage,
+				Signature:       author.Signature,
+				TotalFavorited:  int64(author.FavoritedCount),
+				WorkCount:       int64(author.WorkCount),
+				FavoriteCount:   int64(author.FavoritingCount),
+			},
+			PlayUrl:       temp_video.PlayUrl,
+			CoverUrl:      temp_video.CoverUrl,
+			FavoriteCount: int64(temp_video.LikeCount),
+			CommentCount:  int64(temp_video.CommentCount),
+			IsFavorite:    true,
+			Title:         temp_video.Title,
+		})
+	}
+
 	return &favorite.FavoriteListResponse{
 		StatusCode: 0,
 		StatusMsg:  "success",
-		VideoList:  data,
+		VideoList:  videos_resp,
 	}, nil
 }
