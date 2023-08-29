@@ -97,9 +97,9 @@ func (dao *LikeDao) CreateCommentLike(likeComment *model.LikeComment) error {
 //	@Date 2023-08-20 16:25:54
 //	@param videoLikeId
 //	@return err 错误信息
-func (dao *LikeDao) DeleteVideoLikeById(videoLikeId int64) error {
+func (dao *LikeDao) DeleteVideoLikeByIds(videoId int64, userId int64) error {
 	var videoLike *model.LikeVideo
-	err := dao.DB.Model(&model.LikeVideo{}).Where("id=?", uint(videoLikeId)).Delete(&videoLike).Error
+	err := dao.DB.Model(&model.LikeVideo{}).Where("user_id = ? and video_id = ?", userId, videoId).Delete(&videoLike).Error
 	if err != nil {
 		return err
 	}
@@ -139,9 +139,9 @@ func (dao *LikeDao) DeleteVideoLikeById(videoLikeId int64) error {
 //	@Date 2023-08-20 19:07:34
 //	@param commentLikeId
 //	@return err 错误信息
-func (dao *LikeDao) DeleteCommentLikeById(commentLikeId int64) error {
+func (dao *LikeDao) DeleteCommentLikeById(commentId int64, userId int64) error {
 	var commentLike *model.LikeComment
-	err := dao.DB.Model(&model.LikeComment{}).Where("id=?", uint(commentLikeId)).Delete(&commentLike).Error
+	err := dao.DB.Model(&model.LikeComment{}).Where("comment_id=? and user_id=?", uint(commentId), uint(userId)).Delete(&commentLike).Error
 	if err != nil {
 		return err
 	}
