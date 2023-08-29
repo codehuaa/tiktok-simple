@@ -11,8 +11,6 @@ package dao
 import (
 	"context"
 	"gorm.io/gorm"
-	"tiktok-simple/kitex/kitex_gen/user"
-	"tiktok-simple/kitex/kitex_gen/video"
 	"tiktok-simple/repository/db"
 	"tiktok-simple/repository/db/model"
 )
@@ -93,7 +91,7 @@ func (dao *LikeDao) CreateCommentLike(likeComment *model.LikeComment) error {
 	return err
 }
 
-func (dao *LikeDao) GetVideoLikeList(userId int64) (videos []*video.Video, err error) {
+func (dao *LikeDao) GetVideoLikeList(userId int64) (videos []*model.Video, err error) {
 	// 获取所有video_list的所有id
 	var video_ids []int
 	if err = dao.DB.Model(&model.LikeVideo{}).Where("user_id", userId).Find(&video_ids).Error; err != nil {
@@ -101,31 +99,16 @@ func (dao *LikeDao) GetVideoLikeList(userId int64) (videos []*video.Video, err e
 	}
 	for _, id := range video_ids {
 		// 查找id对用的视频信息
-		var video_model *model.Video
-		if err = dao.DB.Model(&model.Video{}).Where("id = ?", id).First(&video_model).Error; err != nil {
+		var video *model.Video
+		if err = dao.DB.Model(&model.Video{}).Where("id = ?", id).First(&video).Error; err != nil {
 			return
 		}
 		// 查找对应的作者信息
 		var author *model.User
-		if err = dao.DB.Model(&model.User{}).Where("id = ?", video_model.AuthorID).First(&author).Error; err != nil {
+		if err = dao.DB.Model(&model.User{}).Where("id = ?", video.AuthorID).First(&author).Error; err != nil {
 			return
 		}
-		// 放到返回列表中
-		videos = append(videos, &video.Video{
-			Id: int64(video_model.ID),
-			Author: &user.User{
-				Id:              int64(author.ID),
-				Name:            author.UserName,
-				FollowCount:     int64(author.FollowingCount),
-				FollowerCount:   int64(author.FollowerCount),
-				Avatar:          author.Avatar,
-				BackgroundImage: author.BackgroundImage,
-				Signature:       author.Signature,
-				TotalFavorited:  int64(author.FavoritedCount),
-				WorkCount:       int64(author.WorkCount),
-				FavoriteCount:   int64(author.FavoritingCount),
-			},
-		})
+		videos = append(videos, video)
 	}
 	return
 }
