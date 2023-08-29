@@ -52,7 +52,6 @@ func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 			} else {
 				return nil, ErrTokenInvalid
 			}
-
 		}
 	}
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {

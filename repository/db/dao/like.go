@@ -11,6 +11,8 @@ package dao
 import (
 	"context"
 	"gorm.io/gorm"
+	"tiktok-simple/kitex/kitex_gen/user"
+	"tiktok-simple/kitex/kitex_gen/video"
 	"tiktok-simple/repository/db"
 	"tiktok-simple/repository/db/model"
 )
@@ -91,15 +93,52 @@ func (dao *LikeDao) CreateCommentLike(likeComment *model.LikeComment) error {
 	return err
 }
 
+func (dao *LikeDao) GetVideoLikeList(userId int64) (videos []*video.Video, err error) {
+	// 获取所有video_list的所有id
+	var video_ids []int
+	if err = dao.DB.Model(&model.LikeVideo{}).Where("user_id", userId).Find(&video_ids).Error; err != nil {
+		return
+	}
+	for _, id := range video_ids {
+		// 查找id对用的视频信息
+		var video_model *model.Video
+		if err = dao.DB.Model(&model.Video{}).Where("id = ?", id).First(&video_model).Error; err != nil {
+			return
+		}
+		// 查找对应的作者信息
+		var author *model.User
+		if err = dao.DB.Model(&model.User{}).Where("id = ?", video_model.AuthorID).First(&author).Error; err != nil {
+			return
+		}
+		// 放到返回列表中
+		videos = append(videos, &video.Video{
+			Id: int64(video_model.ID),
+			Author: &user.User{
+				Id:              int64(author.ID),
+				Name:            author.UserName,
+				FollowCount:     int64(author.FollowingCount),
+				FollowerCount:   int64(author.FollowerCount),
+				Avatar:          author.Avatar,
+				BackgroundImage: author.BackgroundImage,
+				Signature:       author.Signature,
+				TotalFavorited:  int64(author.FavoritedCount),
+				WorkCount:       int64(author.WorkCount),
+				FavoriteCount:   int64(author.FavoritingCount),
+			},
+		})
+	}
+	return
+}
+
 // DeleteVideoLikeById
 //
 //	@Description: 根据Id撤销视频喜欢
 //	@Date 2023-08-20 16:25:54
 //	@param videoLikeId
 //	@return err 错误信息
-func (dao *LikeDao) DeleteVideoLikeById(videoLikeId int64) error {
+func (dao *LikeDao) DeleteVideoLikeByIds(videoId int64, userId int64) error {
 	var videoLike *model.LikeVideo
-	err := dao.DB.Model(&model.LikeVideo{}).Where("id=?", uint(videoLikeId)).Delete(&videoLike).Error
+	err := dao.DB.Model(&model.LikeVideo{}).Where("user_id = ? and video_id = ?", userId, videoId).Delete(&videoLike).Error
 	if err != nil {
 		return err
 	}
@@ -139,9 +178,9 @@ func (dao *LikeDao) DeleteVideoLikeById(videoLikeId int64) error {
 //	@Date 2023-08-20 19:07:34
 //	@param commentLikeId
 //	@return err 错误信息
-func (dao *LikeDao) DeleteCommentLikeById(commentLikeId int64) error {
+func (dao *LikeDao) DeleteCommentLikeById(commentId int64, userId int64) error {
 	var commentLike *model.LikeComment
-	err := dao.DB.Model(&model.LikeComment{}).Where("id=?", uint(commentLikeId)).Delete(&commentLike).Error
+	err := dao.DB.Model(&model.LikeComment{}).Where("comment_id=? and user_id=?", uint(commentId), uint(userId)).Delete(&commentLike).Error
 	if err != nil {
 		return err
 	}
