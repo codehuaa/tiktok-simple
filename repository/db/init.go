@@ -46,7 +46,7 @@ func init() {
 	_db = db
 
 	err = _db.Set("gorm:table_options", "charset=utf8mb4").
-		AutoMigrate(&model.User{}, &model.Comment{}, &model.LikeComment{}, &model.LikeVideo{}, &model.Video{})
+		AutoMigrate(&model.User{}, &model.Comment{}, &model.LikeComment{}, &model.Video{})
 	if err != nil {
 		return
 	}
