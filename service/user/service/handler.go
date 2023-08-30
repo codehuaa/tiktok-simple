@@ -7,6 +7,7 @@ import (
 	"tiktok-simple/pkg/jwt"
 	"tiktok-simple/repository/db/dao"
 	"tiktok-simple/repository/db/model"
+	"tiktok-simple/repository/redis"
 	"time"
 )
 
@@ -32,11 +33,11 @@ func (s *UserServiceImpl) Register(ctx context.Context, req *user.UserRegisterRe
 		return &user.UserRegisterResponse{StatusCode: 1}, err
 	}
 
-	// TODO 如果成功，生成token，并返回给用户
+	// 如果成功，生成token，并返回给用户
 	claims := jwt.CustomClaims{
 		Id: int64(User.ID),
 	}
-	claims.ExpiresAt = time.Now().Add(time.Minute * 5).Unix()
+	// claims.ExpiresAt = time.Now().Add(time.Minute * 5).Unix()
 	token, err := Jwt.CreateToken(claims)
 	if err != nil {
 		return nil, err
@@ -59,8 +60,23 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 		return nil, err
 	}
 	if User.Password == req.Password {
-		// TODO 如果成功，生成token，并返回给用户
-		token := "this is tmp token"
+		// 如果成功，生成token，并返回给用户
+		claims := jwt.CustomClaims{
+			Id: int64(User.ID),
+		}
+		// claims.ExpiresAt = time.Now().Add(time.Minute * 5).Unix()
+		token, err := Jwt.CreateToken(claims)
+		if err != nil {
+			return
+		}
+
+		// 在 redis 中创建登录记录, 默认7天
+		redis_client := redis.GetRedisClietn(ctx)
+		err = redis_client.Set(token, 1, time.Hour*24*7).Err()
+		if err != nil {
+			return
+		}
+
 		return &user.UserLoginResponse{
 			StatusCode: 0,
 			StatusMsg:  "success",
@@ -74,9 +90,24 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 // UserInfo implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserInfo(ctx context.Context, req *user.UserInfoRequest) (resp *user.UserInfoResponse, err error) {
 	userId := req.UserId
-	// token := req.Token
+	token := req.Token
 	userDao := dao.NewUserDao(ctx)
-	// TODO: 调用redis确认用户登陆状态
+
+	// 如果 id 和 token 不对应，返回
+	claims, err := Jwt.ParseToken(token)
+	if claims.Id != userId {
+		return nil, errors.New("token和id不符！")
+	}
+
+	// 调用redis确认用户登陆状态 (即 redis 中是否存在该token)
+	redis_client := redis.GetRedisClietn(ctx)
+	is_exsist, err := redis_client.Exists(token).Result()
+	if err != nil {
+		return nil, err
+	}
+	if is_exsist != 1 {
+		return nil, errors.New("该用户还未登录！")
+	}
 
 	// 获取用户信息
 	userInfo, err := userDao.FindUserByUserId(uint(userId))

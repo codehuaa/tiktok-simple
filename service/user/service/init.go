@@ -13,5 +13,6 @@ import "tiktok-simple/pkg/jwt"
 var Jwt *jwt.JWT
 
 func Init(signingKey string) {
+	// 初始化 Jwt
 	Jwt = jwt.NewJWT([]byte(signingKey))
 }
