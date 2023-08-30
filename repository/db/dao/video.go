@@ -13,6 +13,7 @@ import (
 	"gorm.io/gorm"
 	"tiktok-simple/repository/db"
 	"tiktok-simple/repository/db/model"
+	"time"
 )
 
 type videoDao struct {
@@ -56,4 +57,17 @@ func (dao *videoDao) FindVideoByVideoId(id int64) (video *model.Video, err error
 		Find(&video).Error
 
 	return
+}
+
+func (dao *videoDao) GetVideoList(limit int, latestTime *int64) ([]*model.Video, error) {
+	videos := make([]*model.Video, 0)
+
+	if latestTime == nil || *latestTime == 0 {
+		curTime := time.Now().UnixMilli()
+		latestTime = &curTime
+	}
+	if err := dao.Limit(limit).Order("created_at desc").Find(&videos, "created_at < ?", time.UnixMilli(*latestTime)).Error; err != nil {
+		return nil, err
+	}
+	return videos, nil
 }

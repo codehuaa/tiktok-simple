@@ -68,3 +68,7 @@ type CommentList struct {
 	Base
 	CommentList []*comment.Comment `json:"comment_list"`
 }
+
+type RelationAction struct {
+	Base
+}

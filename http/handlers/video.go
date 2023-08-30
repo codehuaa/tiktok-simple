@@ -9,8 +9,10 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"io"
 	"net/http"
 	"strconv"
 	"tiktok-simple/http/rpc"
@@ -57,7 +59,52 @@ func Feed(ctx context.Context, req *app.RequestContext) {
  * @Author:
  */
 func PublishAction(ctx context.Context, req *app.RequestContext) {
+	token := req.PostForm("token")
+	if token == "" {
+		req.JSON(http.StatusOK, response.PublishAction{
+			Base: response.Err("用户鉴权失败，token为空"),
+		})
+		return
+	}
+	title := req.PostForm("title")
+	if title == "" {
+		req.JSON(http.StatusOK, response.PublishAction{
+			Base: response.Err("标题不能为空"),
+		})
+		return
+	}
+	// 视频数据
+	file, err := req.FormFile("data")
+	if err != nil {
+		req.JSON(http.StatusBadRequest, response.RelationAction{
+			Base: response.Err("上传视频加载失败"),
+		})
+		return
+	}
+	src, err := file.Open()
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.Copy(buf, src); err != nil {
+		req.JSON(http.StatusBadRequest, response.RelationAction{
+			Base: response.Err("视频上传失败"),
+		})
+		return
+	}
 
+	r := &video.PublishActionRequest{
+		Token: token,
+		Title: title,
+		Data:  buf.Bytes(),
+	}
+	res, _ := rpc.PublishAction(ctx, r)
+	if res.StatusCode == -1 {
+		req.JSON(http.StatusOK, response.PublishAction{
+			Base: response.Err(res.StatusMsg),
+		})
+		return
+	}
+	req.JSON(http.StatusOK, response.PublishAction{
+		Base: response.OK,
+	})
 }
 
 /**
@@ -66,5 +113,28 @@ func PublishAction(ctx context.Context, req *app.RequestContext) {
  * @Author:
  */
 func PublishList(ctx context.Context, req *app.RequestContext) {
+	token := req.GetString("token")
 
+	uid, err := strconv.ParseInt(req.PostForm("user_id"), 10, 64)
+	if err != nil {
+		req.JSON(http.StatusOK, response.PublishList{
+			Base: response.Err("user_id不合法"),
+		})
+		return
+	}
+	r := &video.PublishListRequest{
+		Token:  token,
+		UserId: uid,
+	}
+	res, _ := rpc.PublishList(ctx, r)
+	if res.StatusCode == -1 {
+		req.JSON(http.StatusOK, response.PublishList{
+			Base: response.Err(res.StatusMsg),
+		})
+		return
+	}
+	req.JSON(http.StatusOK, response.PublishList{
+		Base:      response.OK,
+		VideoList: res.VideoList,
+	})
 }
