@@ -1,5 +1,5 @@
-<div align="center">
- <font size="18" >Tiktok-Simple</font>
+
+ # Tiktok-Simple
 
 ![Static Badge](https://img.shields.io/badge/go-b)
 ![Static Badge](https://img.shields.io/badge/kitex-blue)
@@ -8,7 +8,6 @@
 ![Static Badge](https://img.shields.io/badge/redis-b)
 ![Static Badge](https://img.shields.io/badge/字节跳动青训营-blue)
 
-</div>
 
 > 字节跳动第六届青训营
 
