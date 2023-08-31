@@ -71,8 +71,19 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 			return nil, err
 		}
 
-		// 在 redis 中创建登录记录, 默认7天
 		redis_client := redis.GetRedisClietn(ctx)
+
+		// 检查登陆情况，本项目设置仅允许同时一个账户登录
+		// var res int64
+		// res, err = redis_client.Exists(token).Result()
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// if res == 1 {
+		// 	return nil, errors.New("该账户已经登录！")
+		// }
+
+		// 在 redis 中创建登录记录, 默认7天
 		err = redis_client.Set(token, 1, time.Hour*24*7).Err()
 		if err != nil {
 			return nil, err
