@@ -8,6 +8,7 @@ import (
 	"tiktok-simple/kitex/kitex_gen/video"
 	"tiktok-simple/repository/db/dao"
 	"tiktok-simple/repository/db/model"
+	"tiktok-simple/repository/redis"
 )
 
 // FavoriteServiceImpl implements the last service interface defined in the IDL.
@@ -15,7 +16,7 @@ type FavoriteServiceImpl struct{}
 
 // FavoriteAction implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.FavoriteActionRequest) (resp *favorite.FavoriteActionResponse, err error) {
-	// TODO: 使用redis鉴定用户登录状态
+
 	video_id := req.VideoId
 	token := req.Token
 	action_type := req.ActionType
@@ -24,6 +25,16 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 		return nil, errors.New("token错误")
 	}
 	user_id := claims.Id
+
+	// 使用redis鉴定用户登录状态
+	redis_client := redis.GetRedisClietn(ctx)
+	res, err := redis_client.Exists(token).Result()
+	if err != nil {
+		return nil, err
+	}
+	if res != 1 {
+		return nil, errors.New("该用户还未登录！")
+	}
 
 	// 操作数据库
 	likeDao := dao.NewLikeDao(ctx)
@@ -49,7 +60,7 @@ func (s *FavoriteServiceImpl) FavoriteAction(ctx context.Context, req *favorite.
 // FavoriteList implements the FavoriteServiceImpl interface.
 func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.FavoriteListRequest) (resp *favorite.FavoriteListResponse, err error) {
 	// TODO: 使用redis鉴定用户登录状态
-	// token := req.Token
+	token := req.Token
 	user_id := req.UserId
 	like_dao := dao.NewLikeDao(ctx)
 	user_dao := dao.NewUserDao(ctx)
@@ -57,6 +68,16 @@ func (s *FavoriteServiceImpl) FavoriteList(ctx context.Context, req *favorite.Fa
 	data, err := like_dao.GetVideoLikeList(user_id)
 	if err != nil {
 		return
+	}
+
+	// 使用redis鉴定用户登录状态
+	redis_client := redis.GetRedisClietn(ctx)
+	res, err := redis_client.Exists(token).Result()
+	if err != nil {
+		return nil, err
+	}
+	if res != 1 {
+		return nil, errors.New("该用户还未登录！")
 	}
 
 	var videos_resp []*video.Video
