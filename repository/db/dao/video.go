@@ -71,3 +71,53 @@ func (dao *videoDao) GetVideoList(limit int, latestTime *int64) ([]*model.Video,
 	}
 	return videos, nil
 }
+
+func (dao *videoDao) CreateVideo(video *model.Video) error {
+	err := dao.Transaction(func(tx *gorm.DB) error {
+		// 1. 在 video 表中创建视频记录
+		err := tx.Create(video).Error
+		if err != nil {
+			return err
+		}
+		// 2. 同步 user 表中的作品数量
+		res := tx.Model(&model.User{}).Where("id = ?", video.AuthorID).Update("work_count", gorm.Expr("work_count + ?", 1))
+		if res.Error != nil {
+			return err
+		}
+		if res.RowsAffected != 1 {
+			return gorm.ErrInvalidField
+		}
+		return nil
+	})
+
+	return err
+}
+
+func (dao *videoDao) DelVideoByID(videoID int64, authorID int64) error {
+	err := dao.Transaction(func(tx *gorm.DB) error {
+		// 1. 根据主键 video_id 删除 video
+		err := tx.Unscoped().Delete(&model.Video{}, videoID).Error
+		if err != nil {
+			return err
+		}
+		// 2. 同步 user 表中的作品数量
+		res := tx.Model(&model.User{}).Where("id = ?", authorID).Update("work_count", gorm.Expr("work_count - ?", 1))
+		if res.Error != nil {
+			return err
+		}
+		if res.RowsAffected != 1 {
+			return gorm.ErrInvalidField
+		}
+		return nil
+	})
+	return err
+}
+
+func (dao *videoDao) GetVideosByUserID(authorId int64) ([]*model.Video, error) {
+	var pubList []*model.Video
+	err := dao.Model(&model.Video{}).Where(&model.Video{AuthorID: uint(authorId)}).Find(&pubList).Error
+	if err != nil {
+		return nil, err
+	}
+	return pubList, nil
+}
