@@ -65,16 +65,17 @@ func (s *UserServiceImpl) Login(ctx context.Context, req *user.UserLoginRequest)
 			Id: int64(User.ID),
 		}
 		// claims.ExpiresAt = time.Now().Add(time.Minute * 5).Unix()
-		token, err := Jwt.CreateToken(claims)
+		var token string
+		token, err = Jwt.CreateToken(claims)
 		if err != nil {
-			return
+			return nil, err
 		}
 
 		// 在 redis 中创建登录记录, 默认7天
 		redis_client := redis.GetRedisClietn(ctx)
 		err = redis_client.Set(token, 1, time.Hour*24*7).Err()
 		if err != nil {
-			return
+			return nil, err
 		}
 
 		return &user.UserLoginResponse{
