@@ -139,7 +139,7 @@ func (s *VideoServiceImpl) PublishAction(ctx context.Context, req *video.Publish
 	}
 
 	go func() {
-		err := VideoPublish(req.Data, videoTitle, coverTitle)
+		err := dao.NewVideoDao(ctx).CreateVideo(&model.Video{})
 		if err != nil {
 			// 发生错误，则删除插入的记录
 			e := dao.NewVideoDao(ctx).DelVideoByID(int64(v.ID), userID)
